@@ -1,0 +1,15 @@
+{
+    "seq_model_path": "wights/yolov8m-seg.pt",
+	"pose_model_path": "wights/yolov8m-pose.pt",
+    "Intial_pef_results": 0.1,
+    "Final_pef_results": 0.9,
+    "circumference_factor": 0.75,
+	"Front_screen": 10,
+    "Front_data": 20,
+    "Side_screen": 30,
+	"Side_data": 40,
+	"chest_persentage": 0.3,
+	"Waist_persentage": 0.6,
+	"User_name":"user",
+	"shrink_factor_value":0.9
+}

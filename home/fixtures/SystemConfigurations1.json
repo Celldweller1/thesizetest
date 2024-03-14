@@ -1,0 +1,58 @@
+[
+    {
+        "model":"home.SystemConfiguration",
+        "pk":1,
+        "fields":{
+            "key":"max age",
+            "value":"100"
+        }
+    },
+    {
+        "model":"home.SystemConfiguration",
+        "pk":2,
+        "fields":{
+            "key":"max length",
+            "value":"1000"
+        }
+    },
+    {
+        "model":"home.SystemConfiguration",
+        "pk":3,
+        "fields":{
+            "key":"email regex",
+            "value":"/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/"
+        }
+    },
+    {
+        "model":"home.SystemConfiguration",
+        "pk":4,
+        "fields":{
+            "key":"front instructions",
+            "value":"Please open the camera, rise your hands up like the image and take a picture with your hole body included."
+        }
+    },
+    {
+        "model":"home.SystemConfiguration",
+        "pk":5,
+        "fields":{
+            "key":"side instructions",
+            "value":"Please open the camera, stand side, make your hands down and take a picture with your hole body included."
+        }
+    },
+    {
+        "model":"home.SystemConfiguration",
+        "pk":6,
+        "fields":{
+            "key":"side folder",
+            "value":"C:\\Users\\Vip\\Desktop\\thesizeimage\\side"
+        }
+    },
+    {
+        "model":"home.SystemConfiguration",
+        "pk":7,
+        "fields":{
+            "key":"front folder",
+            "value":"C:\\Users\\Vip\\Desktop\\thesizeimage\\front"
+        }
+    }
+]

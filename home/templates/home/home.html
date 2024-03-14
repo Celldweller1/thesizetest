@@ -1,0 +1,475 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,height=device-height, initial-scale=1, maximum-scale=10, user-scalable=0, minimal-ui">
+    <title>The Size</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+<body style="background-color: #1d4948; height: 100vh; display: flex; ">
+    <div id="loadingScreen" style="display: none;" class="loading-screen">
+        <div class="loading-text">Loading<span class="dots">...</span></div>
+        <div class="spinner"></div>
+    </div>
+    
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form id="contactForm" class="bg-light p-4 shadow rounded" style="max-width: 1000px; " method="POST" onSubmit="return submitForm();" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="col-md-6 text-center">
+                    <div class="mb-4" style="width: 350px; margin: auto;">
+                        <img src="{% static 'home/images/thesizelogo.png' %}" alt="Your Logo" class="img-fluid logo-image">
+                    </div>
+                </div>
+
+                {% if request.session.vote == 1 %}
+                    <div class="form-group position-relative">
+                        <label for="name"  >Chest: {{request.session.chest}}</label> <br>
+                        <label for="name"  >Waist: {{request.session.waist}}</label><br>
+                        <label for="name"  >Inseem: {{request.session.inseem}}</label><br>
+                        <label for="name"  >Hipps: {{request.session.hipps}}</label><br>
+                        <label for="name"  >Arm: {{request.session.arm}}</label>
+                    </div>
+                {% endif  %}
+                <div class="form-group position-relative">
+                    <label for="name"  class="required">Name:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="name-addon"><i class="fas fa-user"></i></span>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback" id="name-error-message">Please enter your name.</div>
+                </div>
+
+                <div class="form-group position-relative">
+                    <label for="email" class="required">Email:</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" id="email" name="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Enter a valid email address" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="email-addon"><i class="fas fa-envelope"></i></span>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback" id="email-error-message">Please enter a valid email address.</div>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="gender" class="required">Gender:</label>
+                    <select class="form-control" id="gender" name="gender" required>
+                        <option value="" disabled selected>Select your gender</option>
+                        <option value="male"><i class="fas fa-mars"></i> Male</option>
+                        <option value="female"><i class="fas fa-venus"></i> Female</option>
+                    </select>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="age" class="required">Age:</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="age" name="age" min="0" pattern="[0-9]+" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="age-addon"><i class="fas fa-calendar"></i></span>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback" id="age-error-message">Please enter a valid, positive age less than {{maxAge}}.</div>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="contactNumber" class="required">Contact Number:</label>
+                    <div class="input-group">
+                        <input type="tel" class="form-control" id="contactNumber" name="contactNumber" pattern="[0-9]+" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="contactNumber-addon"><i class="fas fa-phone"></i></span>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback" id="contactNumber-error-message">Please enter your contact number.</div>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="userLength" class="required">Length:</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="userLength" name="userLength" min="0" pattern="[0-9]+" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="height-addon"><i class="fas fa-sort-numeric-up"></i></span>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback" id="length-error-message">Please enter a valid, positive length less than {{maxLength}}.</div>
+                </div>
+                <div class="form-group position-relative">
+                    <label id="videoText" style="display:none;">Thank you!</label>
+                    <div class="input-group">
+                        <main id="container">
+                            <div id="videoContainer" class="video-container">
+                                <video id="gum" playsinline autoplay muted class="video-element"></video>
+                                <span id="overlayText">-- GET READY HANDS UP --</span>
+                                <input type="file" id="frontVideo" name="frontVideo" style="display:none;" accept="video/mp4,video/x-m4v,video/*" > 
+                                <input type="file" id="sideVideo" name="sideVideo" style="display:none;" accept="video/mp4,video/x-m4v,video/*" > 
+
+                            </div>
+                            <section>
+                              <button type="button" id="start">Start camera</button>
+                            </section>
+                          </main>
+                    </div>
+                    <div class="invalid-feedback" id="video-error-message">Please press start camera to scan.</div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-success btn-lg rounded-pill custom-width btn-submit">Start Scanning</button>
+                </div>
+            </form>        
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and jQuery (make sure to include them before closing the body tag) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Font Awesome icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+
+<style>
+    .custom-width {
+        width: 200px; /* You can adjust the width as needed */
+    }
+
+    .bg-light {
+        background-color: #f4f4f4; /* You can adjust the color as needed */
+    }
+
+    @media screen and (min-width: 1000px) {
+        .logo-image {
+            margin-left:50px
+        }
+    }
+    .required:after {
+        content:" *";
+        color: red;
+      }
+      .btn-submit {
+        margin-top:10px;
+    background-color: #1d4948 !important;
+    border-color: #1d4948 !important;
+}
+
+
+.collapse{
+    color:red;
+}
+
+
+
+
+
+#initialScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 18px;
+  }
+
+  #camera {
+    display: none;
+  }
+
+  /* Style for text overlay */
+  #overlayText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    z-index: 1; /* Ensure the text appears above the video */
+  }
+  .video-container{
+    display:none;
+  }
+  .video-element {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+    
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* semi-transparent background */
+    display: flex;
+    flex-direction: column; /* stack text and spinner vertically */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* ensure loading screen appears on top of other content */
+}
+
+.loading-text {
+    font-size: 18px; /* adjust size as needed */
+    margin-bottom: 20px; /* adjust spacing between text and spinner */
+}
+
+.dots {
+    animation: pulse 1.5s infinite;
+}
+
+.spinner {
+    width: 50px; /* adjust size as needed */
+    height: 50px; /* adjust size as needed */
+    border-radius: 50%;
+    border: 6px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #333; /* spinner color */
+    animation: spin 1s infinite linear; /* spinning animation */
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+</style>
+
+<script>
+    function submitForm() {
+        var formData = {
+            name: $('#name').val(),
+            email: $('#email').val(),
+            age: $('#age').val(),
+            userLength: $('#userLength').val(),
+            gender: $('#gender').val(),
+            contactNumber: $('#contactNumber').val(),
+            subject: $('#subject').val(),
+            message: $('#message').val()
+        };
+        var counterInvalidData = 0;
+
+        // Validate name is not empty
+        if (formData.name.trim() === '') {
+            $('#name-error-message').css('display', 'block');
+             counterInvalidData++;
+        }
+        else
+            $('#name-error-message').css('display', 'none');
+
+        // Validate email format
+        var emailRegex = {{emailRegex}};
+        if (!emailRegex.test(formData.email)) {
+            $('#email-error-message').css('display', 'block');
+             counterInvalidData++;
+        }
+        else
+            $('#email-error-message').css('display', 'none');
+
+
+
+        // Validate age is a positive number
+        var ageValue = parseFloat(formData.age);
+        if (isNaN(ageValue) || ageValue < 0 || ageValue > {{maxAge}}) {
+            $('#age-error-message').css('display', 'block');
+             counterInvalidData++;
+        }
+        else
+            $('#age-error-message').css('display', 'none');
+
+        // Validate height is a positive number
+        var userLength = parseFloat(formData.userLength);
+        if (isNaN(userLength) || userLength < 0 || userLength > {{maxLength}}) {
+            $('#length-error-message').css('display', 'block');
+             counterInvalidData++;
+        }
+        else 
+            $('#length-error-message').css('display', 'none');
+
+        // Hide the error message if the height is valid
+        $('#height-error-message').css('display', 'none');
+        if (formData.contactNumber.trim() === '') {
+            $('#contactNumber-error-message').css('display', 'block');
+             counterInvalidData++;
+        }
+        else
+            $('#contactNumber-error-message').css('display', 'none');
+
+
+        if (document.getElementById('frontVideo').files.length ==0) {
+            $('#video-error-message').css('display', 'block');
+                counterInvalidData++;
+        }
+        else
+            $('#video-error-message').css('display', 'none');
+
+        if (document.getElementById('sideVideo').files.length ==0) {
+            $('#video-error-message').css('display', 'block');
+                counterInvalidData++;
+        }
+        else
+            $('#video-error-message').css('display', 'none');
+        if(counterInvalidData > 0 )
+            return false;
+        else{
+            document.getElementById('loadingScreen').style.display = 'flex';
+            return true;
+        }
+    } 
+
+
+
+
+
+
+
+
+
+    let mediaRecorder;
+let recordedBlobs = [];
+let isRecording = false;
+let frontBlobUrl, sideBlobUrl;
+var timeout_status = 0;
+var frontVideo = null;
+var sideVideo = null;
+
+
+const errorMsgElement = document.querySelector("span#errorMsg");
+const mimeContent = window.MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+{% comment %} const mimeContent = "video/x-matroska;codecs=vp9.0"; {% endcomment %}
+
+
+var counter = 0;
+function handleDataAvailable(event) {
+  if (event.data && event.data.size > 0) {
+    recordedBlobs.push(event.data);
+  }
+}
+
+function startRecording() {
+  recordedBlobs = [];
+  let options = { mimeType:mimeContent };
+  try {
+    mediaRecorder = new MediaRecorder(window.stream, options);
+  } catch (e) {
+    console.error("Exception while creating MediaRecorder:", e);
+    errorMsgElement.innerHTML = `Exception while creating MediaRecorder: ${JSON.stringify(
+      e
+    )}`;
+    return;
+  }
+  mediaRecorder.onstop = (event) => {
+    if(counter %2 ==0)
+        createDownloadLink('front')
+    else
+        createDownloadLink('side')
+    counter++;
+    recordedBlobs = [];
+}
+  mediaRecorder.ondataavailable = handleDataAvailable;
+  mediaRecorder.start();
+  isRecording = true;
+}
+
+function stopRecording(type) {    
+  if (mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    isRecording = false;
+  }
+}
+
+document.querySelector("button#start").addEventListener("click", async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+  video: { 
+    frameRate: 10
+  }    });
+    window.stream = stream;
+    const gumVideo = document.querySelector("video#gum");
+    gumVideo.srcObject = stream;
+    repeatedGreetings();
+  } catch (e) {
+    console.error("navigator.getUserMedia error:", e);
+    errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+  }
+});
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+const upload = (type) => new Promise((resolve) => {
+    stopRecording(type);
+ resolve('Promise resolved'); 
+})
+
+const repeatedGreetings = async () => {
+    $('#videoContainer').css('display', 'block');
+
+  await sleep(10000)
+  document.getElementById('overlayText').innerHTML ='-- FRONT --'
+  startRecording();
+  await sleep(3000)
+  stopRecording('front');
+  document.getElementById('overlayText').innerHTML ='-- GET READY HANDS DOWN--'
+  await sleep(10000)
+  document.getElementById('overlayText').innerHTML ='-- SIDE --'
+  startRecording();
+  await sleep(3000)
+  stopRecording('side');
+  document.getElementById('overlayText').innerHTML ='-- GET READY HANDS UP--'
+  if (window.stream) {
+      window.stream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    $('#videoContainer').css('display', 'none');
+    $('#videoText').css('display','block')
+}
+
+function createDownloadLink(type) {
+
+    const superBuffer = new Blob(recordedBlobs, { type: mimeContent });
+
+  if(type === 'front'){
+    var file = new File([superBuffer], "name1");
+    const dataTransfer = new ClipboardEvent('').clipboardData || new DataTransfer();
+    dataTransfer.items.add(file);
+    document.getElementById('frontVideo').files =dataTransfer.files
+    console.log('front')
+    console.log(superBuffer)
+  }
+    else{
+        var file = new File([superBuffer], "name2");
+        const dataTransfer = new ClipboardEvent('').clipboardData || new DataTransfer();
+        dataTransfer.items.add(file);
+    document.getElementById('sideVideo').files =dataTransfer.files
+    console.log(superBuffer)
+    }
+    
+}
+</script>
+
+</body>
+</html>

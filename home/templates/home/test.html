@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Camera Capture</title>
+  <style>
+    #initialScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    #camera {
+      display: none;
+    }
+
+    /* Style for text overlay */
+    #overlayText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      z-index: 1; /* Ensure the text appears above the video */
+    }
+  </style>
+</head>
+<body>
+<main id="container">
+  <video id="gum" playsinline autoplay muted></video>
+  <span id="overlayText">----- FRONT -----</span>
+
+  <section>
+    <button id="start">Start camera</button>
+    <button id="record" disabled>Record</button>
+    <button id="play" >Play</button>
+  </section>
+</main>
+<script>
+let mediaRecorder;
+let recordedBlobs = [];
+let isRecording = false;
+let frontBlobUrl, sideBlobUrl;
+var timeout_status = 0;
+
+
+const errorMsgElement = document.querySelector("span#errorMsg");
+const recordButton = document.querySelector("button#record");
+const playButton = document.querySelector("button#play");
+const mimeContent = window.MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+
+recordButton.addEventListener("click", () => {
+  if (!isRecording) {
+    startRecording();
+  } else {
+    stopRecording();
+  }
+});
+
+playButton.addEventListener("click", () => {
+  createDownloadLink()
+});
+
+function handleDataAvailable(event) {
+  if (event.data && event.data.size > 0) {
+    recordedBlobs.push(event.data);
+  }
+}
+
+function startRecording() {
+  recordedBlobs = [];
+  let options = { mimeType:'video/webm' };
+  try {
+    mediaRecorder = new MediaRecorder(window.stream, options);
+  } catch (e) {
+    console.error("Exception while creating MediaRecorder:", e);
+    errorMsgElement.innerHTML = `Exception while creating MediaRecorder: ${JSON.stringify(
+      e
+    )}`;
+    return;
+  }
+  mediaRecorder.onstop = (event) => console.log(event);
+  mediaRecorder.ondataavailable = handleDataAvailable;
+  mediaRecorder.start();
+  isRecording = true;
+  recordButton.textContent = "Stop Recording";
+  playButton.disabled = true;
+}
+
+function stopRecording() {    
+  if (mediaRecorder.state === 'recording') {
+    window.clearTimeout(timeout_status);
+    mediaRecorder.stop();
+    isRecording = false;
+    recordButton.textContent = "Record";
+    playButton.disabled = false; 
+  }
+}
+
+document.querySelector("button#start").addEventListener("click", async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: true,
+    });
+    recordButton.disabled = false;
+    window.stream = stream;
+    const gumVideo = document.querySelector("video#gum");
+    gumVideo.srcObject = stream;
+    repeatedGreetings();
+  } catch (e) {
+    console.error("navigator.getUserMedia error:", e);
+    errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+  }
+});
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+
+const repeatedGreetings = async () => {
+  await sleep(10000)
+  startRecording();
+  await sleep(10000)
+  stopRecording();
+    await sleep(15)
+  playButton.click();
+  document.getElementById('overlayText').innerHTML ='----- SIDE ----'
+  startRecording();
+  await sleep(10000)
+  stopRecording();
+  await sleep(15)
+  playButton.click();
+}
+
+function createDownloadLink() {
+  const superBuffer = new Blob(recordedBlobs, { type: mimeContent });
+  const blobUrl = window.URL.createObjectURL(superBuffer);
+  
+  // Create a download link
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = blobUrl;
+  a.download = 'recorded-video.mp4'; // Set the desired file name and extension
+  
+  // Append the link to the body and trigger the download
+  document.body.appendChild(a);
+  a.click();
+  
+  // Clean up and return blob URL
+  window.URL.revokeObjectURL(blobUrl);
+  document.body.removeChild(a);
+  return blobUrl;
+}
+</script>
+
+</body>
+</html>
